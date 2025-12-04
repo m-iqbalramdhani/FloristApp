@@ -48,8 +48,8 @@ const PORT = process.env.PORT || 5000;
     const isDev = (process.env.NODE_ENV || 'development') !== 'production';
     await sequelize.sync(isDev ? { alter: true } : {});
     console.log('✅ Models synced');
-    app.listen(5000, "0.0.0.0", () => {
-    console.log(`Server running on port 0.0.0.0:5000`);
+    app.listen(PORT, HOST, () => {
+    console.log(`Server running on port ${PORT}`);
 });
 
   } catch (err) {
