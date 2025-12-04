@@ -107,15 +107,37 @@ exports.getUserOrders = async (req, res) => {
 exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findByPk(req.params.id, {
-      include: [{ model: Payment, as: 'payment' }]
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "email", "phone", "photo_url"]
+        },
+        {
+          model: Payment,
+          as: "payment"
+        },
+        {
+          model: OrderItem,
+          as: "items",
+          include: [
+            { model: Product, as: "product" }
+          ]
+        }
+      ]
     });
-    if (!order) return res.status(404).json({ message: 'Order tidak ditemukan' });
-    res.json({
+
+    if (!order) {
+      return res.status(404).json({ message: "Order tidak ditemukan" });
+    }
+
+    return res.json({
       data: {
         ...order.toJSON(),
         status_text: STATUS_LABEL[order.status]
       }
     });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

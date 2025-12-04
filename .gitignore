@@ -1,9 +1,27 @@
-.env
-node_modules
-uploads
-uploads/*
-uploads/**
-uploads/**/*
-uploads/**/**
-uploads/**/**/*
+# Node / React Native / Expo / Flutter
+node_modules/
+build/
+dist/
+.android/
+.ios/
+*.log
+
+# Firebase / FCM / Google Service Account Keys
 src/config/service-account.json
+google-services.json
+GoogleService-Info.plist
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# OS
+Thumbs.db
+Desktop.ini

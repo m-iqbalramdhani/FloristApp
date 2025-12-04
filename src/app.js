@@ -1,3 +1,4 @@
+const HOST = '0.0.0.0';
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -47,7 +48,10 @@ const PORT = process.env.PORT || 5000;
     const isDev = (process.env.NODE_ENV || 'development') !== 'production';
     await sequelize.sync(isDev ? { alter: true } : {});
     console.log('✅ Models synced');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(5000, "0.0.0.0", () => {
+    console.log(`Server running on port 0.0.0.0:5000`);
+});
+
   } catch (err) {
     console.error('❌ Failed to start server:', err);
     process.exit(1);
