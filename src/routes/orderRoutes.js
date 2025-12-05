@@ -29,7 +29,7 @@ router.get('/:id', authMiddleware, getOrderById);
 router.post('/:id/upload-payment', authMiddleware, upload.single('bukti'), uploadPayment);
 
 // update status
-router.put('/:id/status', authMiddleware, updateStatus);
+router.put('/:id/status', authMiddleware, updateStatus, sendNotification);
 
 module.exports = router;
 

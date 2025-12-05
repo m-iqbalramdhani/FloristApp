@@ -1,3 +1,4 @@
+const sendNotification = require('../utils/sendNotificationV1')
 const Cart = require('../models/Cart');
 const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
@@ -5,6 +6,7 @@ const Order = require('../models/Order');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const sequelize = require('../config/database');
+
 
 // mapping status angka <-> teks
 const STATUS_MAP = {
@@ -137,16 +139,20 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-// 💳 Upload bukti pembayaran
+// 💳 Upload bukti pembayaran (Customer)
 exports.uploadPayment = async (req, res) => {
   try {
     const order_id = req.params.id;
     const { metode, jumlah } = req.body;
     const bukti_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // pastikan order ada
-    const order = await Order.findByPk(order_id);
-    if (!order) return res.status(404).json({ message: 'Order tidak ditemukan' });
+    // pastikan order milik user login
+    const order = await Order.findOne({
+      where: { id: order_id, user_id: req.user.id }
+    });
+
+    if (!order)
+      return res.status(404).json({ message: 'Order tidak ditemukan atau bukan milik Anda' });
 
     const payment = await Payment.create({
       order_id,
@@ -156,27 +162,42 @@ exports.uploadPayment = async (req, res) => {
       status: 'pending'
     });
 
-    // Notif ke User
-sendNotification(
-  user.fcm_token,
-  "Bukti Pembayaran Berhasil Diupload",
-  "Silakan tunggu verifikasi dari admin."
-);
+    // Ambil user
+    const user = await User.findByPk(order.user_id);
 
-// Notif ke Admin
-admins.forEach(adm => {
-  sendNotification(
-    adm.fcm_token,
-    "Bukti Pembayaran Masuk",
-    `Order #${order.id} mengirim bukti pembayaran.`
-  );
-});
+    // 🔔 Notif ke User
+    if (user?.fcm_token) {
+      sendNotification(
+        user.fcm_token,
+        "Bukti Pembayaran Berhasil Diupload",
+        "Tunggu verifikasi dari admin."
+      );
+    }
 
-    res.status(201).json({ message: 'Bukti pembayaran diupload', data: payment });
+    // 🔔 Notif ke Admin
+    const admins = await User.findAll({ where: { role: "admin" } });
+
+    admins.forEach(adm => {
+      if (adm.fcm_token) {
+        sendNotification(
+          adm.fcm_token,
+          "Bukti Pembayaran Baru",
+          `Order #${order.id} mengunggah bukti pembayaran.`
+        );
+      }
+    });
+
+    return res.status(201).json({
+      message: 'Bukti pembayaran berhasil dikirim',
+      data: payment
+    });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    return res.status(500).json({ message: err.message });
   }
 };
+
 
 // 🔁 Update status pesanan (Admin)
 // 🔁 Update status pesanan (Admin)

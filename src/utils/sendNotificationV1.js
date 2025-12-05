@@ -46,4 +46,4 @@ async function sendNotification(fcmToken, title, body, data = {}) {
   }
 }
 
-module.exports = { sendNotification };
+module.exports = sendNotification;
