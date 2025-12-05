@@ -3,6 +3,7 @@ const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Payment = require('../models/Payment');
+const User = require('../models/User');
 const sequelize = require('../config/database');
 
 // mapping status angka <-> teks
@@ -116,13 +117,6 @@ exports.getOrderById = async (req, res) => {
         {
           model: Payment,
           as: "payment"
-        },
-        {
-          model: OrderItem,
-          as: "items",
-          include: [
-            { model: Product, as: "product" }
-          ]
         }
       ]
     });
