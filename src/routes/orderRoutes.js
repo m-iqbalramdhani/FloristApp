@@ -11,6 +11,7 @@ const {
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const sendNotification = require('../utils/sendNotificationV1');
 
 // checkout / create order
 router.post('/', authMiddleware, createOrder);
