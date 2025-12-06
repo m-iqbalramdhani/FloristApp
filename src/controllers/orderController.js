@@ -83,10 +83,23 @@ exports.createOrder = async (req, res) => {
 exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({
-      include: [{ model: Payment, as: 'payment' }],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'phone', 'photo_url']
+        },
+        { model: Payment, as: 'payment' }
+      ],
       order: [['id', 'DESC']]
     });
-    res.json({ data: orders });
+
+    const data = orders.map(o => ({
+      ...o.toJSON(),
+      status_text: STATUS_LABEL[o.status]
+    }));
+
+    res.json({ data });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -97,10 +110,23 @@ exports.getUserOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({
       where: { user_id: req.user.id },
-      include: [{ model: Payment, as: 'payment' }],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'phone', 'photo_url']
+        },
+        { model: Payment, as: 'payment' }
+      ],
       order: [['id', 'DESC']]
     });
-    res.json({ data: orders });
+
+    const data = orders.map(o => ({
+      ...o.toJSON(),
+      status_text: STATUS_LABEL[o.status]
+    }));
+
+    res.json({ data });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
