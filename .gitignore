@@ -25,3 +25,9 @@ GoogleService-Info.plist
 # OS
 Thumbs.db
 Desktop.ini
+
+API_DOCS_ADD_PRODUCT_IMAGE.md
+API_DOCS_CREATE_UPDATE_PRODUCT.md
+Flutter_EXAMPLE_ADD_PRODUCT_IMAGE.dart
+Flutter_EXAMPLE_CREATE_UPDATE_PRODUCT.dart
+
