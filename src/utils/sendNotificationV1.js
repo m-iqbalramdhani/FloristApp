@@ -1,15 +1,27 @@
 const { GoogleAuth } = require('google-auth-library');
 const axios = require('axios');
-const path = require('path');
 
 const SCOPES = ["https://www.googleapis.com/auth/firebase.messaging"];
-const SERVICE_ACCOUNT_PATH = path.join(__dirname, "../config/service-account.json");
+
+// Ambil kredensial service account dari ENV
+function getServiceAccountCredentials() {
+  const json = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!json) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON env not set');
+  }
+
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is not valid JSON');
+  }
+}
 
 // Ambil Access Token dari Google OAuth2
-async function getAccessToken() {
+async function getAccessToken(credentials) {
   const auth = new GoogleAuth({
-    keyFile: SERVICE_ACCOUNT_PATH,
-    scopes: SCOPES
+    credentials,
+    scopes: SCOPES,
   });
 
   const client = await auth.getClient();
@@ -19,30 +31,30 @@ async function getAccessToken() {
 
 async function sendNotification(fcmToken, title, body, data = {}) {
   try {
-    const accessToken = await getAccessToken();
+    const credentials = getServiceAccountCredentials();
+    const accessToken = await getAccessToken(credentials);
 
     const message = {
       message: {
         token: fcmToken,
         notification: { title, body },
-        data
-      }
+        data,
+      },
     };
 
-    const projectId = JSON.parse(require('fs').readFileSync(SERVICE_ACCOUNT_PATH)).project_id;
-
+    const projectId = credentials.project_id;
     const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
 
     const response = await axios.post(url, message, {
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json"
-      }
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
     });
 
-    console.log("🔥 Notifikasi terkirim:", response.data);
+    console.log('🔥 Notifikasi terkirim:', response.data);
   } catch (err) {
-    console.error("❌ Gagal kirim notifikasi:", err.response?.data || err);
+    console.error('❌ Gagal kirim notifikasi:', err.response?.data || err);
   }
 }
 
